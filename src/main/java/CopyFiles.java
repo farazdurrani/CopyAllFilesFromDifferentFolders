@@ -8,27 +8,44 @@ import java.nio.file.StandardCopyOption;
 /**
  * 
  * This class copies all files from many different folders into one folder.
+ * 
  * @author faraz
  *
  */
 public class CopyFiles {
-	public static void main(String[] args) throws IOException {
-		Path sourcepath = Paths.get("/home/faraz/Desktop/googlephotos");
-		Path destinationepath = Paths.get("/home/faraz/Desktop/allfilesinonefolder/");
-		Files.walk(sourcepath).filter(Files::isRegularFile).filter(file -> notJsonFile(file))
-				.forEach(source -> copy(source, destinationepath));
-	}
 
-	private static boolean notJsonFile(Path file) {
-		return !file.getFileName().toString().substring(file.getFileName().toString().lastIndexOf(".")).equals(".json");
-	}
+    private static final String JSON = ".json";
+    private static final String HTML = ".html";
+    private static final String DOT = ".";
+    private static final String FILE_SEPERATOR = File.separator;
 
-	private static void copy(Path source, Path dest) {
-		try {
-			dest = Paths.get(dest.toString().concat(File.separator + source.getFileName().toString()));
-			Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
+    public static void main(String[] args) throws IOException {
+	Path sourcePath = Paths.get("/home/faraz/Desktop/google");
+	Path destinationePath = Paths.get("/home/faraz/Desktop/pics_vids_from_abbo_phone/");
+	Files.walk(sourcePath).filter(Files::isRegularFile)
+	        .filter(file -> notJsonOrHtmlFile(file))
+	        .forEach(source -> copy(source, destinationePath));
+    }
+
+    private static boolean notJsonOrHtmlFile(final Path file) {
+	return !file.getFileName().toString()
+	        .substring(file.getFileName().toString().lastIndexOf(DOT)).equals(JSON)
+	        && !file.getFileName().toString()
+	                .substring(file.getFileName().toString().lastIndexOf(DOT))
+	                .equals(HTML);
+    }
+
+    private static void copy(final Path sourcePath, Path destinationPath) {
+	try {
+	    Files.copy(sourcePath, createDestinationPath(sourcePath, destinationPath),
+	            StandardCopyOption.REPLACE_EXISTING);
+	} catch (Exception e) {
+	    throw new RuntimeException(e.getMessage(), e);
 	}
+    }
+
+    private static Path createDestinationPath(Path sourcepath, Path destinationpath) {
+	return Paths.get(destinationpath.toString()
+	        .concat(FILE_SEPERATOR + sourcepath.getFileName().toString()));
+    }
 }
